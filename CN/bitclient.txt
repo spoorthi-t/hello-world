@@ -1,0 +1,55 @@
+// BitStuffingClient.java
+import java.io.*;
+import java.net.*;
+import java.util.Scanner;
+
+public class BitStuffingClient {
+    public static void main(String[] args) throws IOException {
+
+        // Step 1: Connect to server at localhost on port 6789
+        Socket socket = new Socket("localhost", 6789);
+
+        // Step 2: Create data streams for communication
+        DataInputStream dis = new DataInputStream(socket.getInputStream());
+        DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+
+        // Step 3: Take data input from user
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter data: ");
+        String data = sc.nextLine();
+
+        // Step 4: Perform bit stuffing
+        int cnt = 0;        // count of consecutive 1s
+        String s = "";      // stuffed string
+
+        for (int i = 0; i < data.length(); i++) {
+            char ch = data.charAt(i);
+
+            if (ch == '1') {
+                cnt++;
+                if (cnt < 5)
+                    s += ch;
+                else {
+                    s = s + ch + '0';  // add '0' after 5 consecutive '1's
+                    cnt = 0;
+                }
+            } else {
+                s += ch;
+                cnt = 0;  // reset count when '0' appears
+            }
+        }
+
+        // Step 5: Add flag bytes at the beginning and end
+        s = "01111110" + s + "01111110";
+
+        // Step 6: Display and send stuffed data to server
+        System.out.println("Data stuffed in client: " + s);
+        System.out.println("Sending to server for unstuffing...");
+        dos.writeUTF(s);
+
+        // Step 7: Close connection
+        dos.close();
+        dis.close();
+        socket.close();
+    }
+}

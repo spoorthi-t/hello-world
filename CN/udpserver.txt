@@ -1,0 +1,57 @@
+import java.net.*; 
+import java.io.*;
+
+public class UDPServer {
+    public static void main(String arg[]) {
+        DatagramSocket socket = null; 
+        BufferedReader br = null;
+
+        try {
+            socket = new DatagramSocket(9222); // Server on port 9222 
+            byte[] receiveData = new byte[1024];
+            byte[] sendData;
+
+            br = new BufferedReader(new InputStreamReader(System.in)); 
+            System.out.println("UDP Server started...");
+
+            while (true) {
+
+                // Receive from client
+                DatagramPacket receivePacket =
+                    new DatagramPacket(receiveData, receiveData.length); 
+                socket.receive(receivePacket);
+
+                String clientMsg = new String(receivePacket.getData(), 0,
+                                              receivePacket.getLength()); 
+                System.out.println("Client: " + clientMsg);
+
+                if (clientMsg.equalsIgnoreCase("quit")) { 
+                    System.out.println("Client exited. Closing server..."); 
+                    break;
+                }
+
+                // Send reply 
+                System.out.print("Server: "); 
+                String reply = br.readLine(); 
+                sendData = reply.getBytes();
+
+                InetAddress clientAddr = receivePacket.getAddress(); 
+                int clientPort = receivePacket.getPort();
+
+                DatagramPacket sendPacket = new DatagramPacket(
+                    sendData, sendData.length, clientAddr, clientPort);
+
+                socket.send(sendPacket);
+
+                if (reply.equalsIgnoreCase("quit")) { 
+                    System.out.println("Server exiting..."); 
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        } finally {
+            if (socket != null) socket.close();
+        }
+    }
+}

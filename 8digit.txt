@@ -1,0 +1,12 @@
+%{
+#include<stdio.h>;
+%}
+%%
+[0-9] { printf("Digit "); }
+%%
+int yywrap(void) {}
+void main()
+{
+    printf("Enter the String:");
+    yylex();
+}

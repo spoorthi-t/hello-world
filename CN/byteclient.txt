@@ -1,0 +1,70 @@
+// SenderByte.java
+import java.io.*;
+import java.util.*;
+import java.net.*;
+
+public class SenderByte {
+    public static void main(String[] args) throws IOException {
+
+        // Step 1: Get IP address and define port number
+        InetAddress ip = InetAddress.getLocalHost();
+        int port = 45678;
+
+        // Step 2: Open a socket connection to the receiver
+        Socket s = new Socket(ip, port);
+
+        // Step 3: Declare I/O streams
+        DataInputStream dis = new DataInputStream(s.getInputStream());
+        DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("Enter the Message to be Sent: ");
+            String data = sc.nextLine();
+            String res = new String();
+
+            // Step 4: Add flag byte ‘F’ at beginning and end
+            data = 'F' + data + 'F';
+
+            // Step 5: Perform byte stuffing
+            for (int i = 0; i < data.length(); i++) {
+                char ch = data.charAt(i);
+
+                // Stuff with 'E' if 'F' is found
+                if (ch == 'F') {
+                    res = res + 'E' + ch;
+                }
+                // Stuff with 'E' if 'E' is found
+                else if (ch == 'E') {
+                    res = res + 'E' + ch;
+                } 
+                // Otherwise, keep the same character
+                else {
+                    res = res + ch;
+                }
+            }
+
+            // Step 6: Display stuffed data
+            System.out.println("The data being sent (with byte stuffed) is: " + res);
+
+            // Step 7: Send the data to the receiver
+            dos.writeUTF(res);
+            System.out.println("Sending Message...");
+
+            // Step 8: Wait for feedback from server
+            if (dis.readUTF().equals("success")) {
+                System.out.println("Thanks for the Feedback Server!!");
+            }
+
+            // Step 9: End messaging
+            dos.writeUTF("bye");
+            break;
+        }
+
+        // Step 10: Close all connections
+        s.close();
+        dis.close();
+        dos.close();
+    }
+}

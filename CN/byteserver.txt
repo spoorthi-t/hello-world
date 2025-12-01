@@ -1,0 +1,67 @@
+// ReceiverByte.java
+import java.io.*;
+import java.net.*;
+
+public class ReceiverByte {
+    public static void main(String[] args) throws IOException {
+
+        // Step 1: Open a socket for connection
+        ServerSocket servsock = new ServerSocket(45678);
+        System.out.println("Server started on port 45678, waiting for client...");
+
+        // Step 2: Wait for client connection
+        Socket socket = servsock.accept();
+        System.out.println("Client connected!");
+
+        // Step 3: Declare I/O Streams
+        DataInputStream dis = new DataInputStream(socket.getInputStream());
+        DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+
+        while (true) {
+            // Step 4: Read stuffed message from sender
+            String res = dis.readUTF();
+            System.out.println("Message Received Successfully!!!");
+            System.out.println("The Stuffed Message is: " + res);
+
+            // Step 5: Perform byte unstuffing
+            String out = new String();
+
+            // Skip the first and last flag bytes
+            for (int i = 1; i < res.length() - 1; i++) {
+                if (res.charAt(i) == 'E') {
+                    // Handle EE → E
+                    if (res.charAt(i + 1) == 'E') {
+                        out = out + 'E';
+                        i++; // Skip the next E
+                    }
+                    // Handle EF → F
+                    else if (res.charAt(i + 1) == 'F') {
+                        out = out + 'F';
+                        i++; // Skip the next F
+                    }
+                } else {
+                    out = out + res.charAt(i);
+                }
+            }
+
+            // Step 6: Display destuffed message
+            System.out.println("The Destuffed Message is: " + out);
+
+            // Step 7: Send feedback to sender
+            dos.writeUTF("success");
+
+            // Step 8: Check if sender wants to end communication
+            String ch = dis.readUTF();
+            if (ch.equals("bye")) {
+                System.out.println("Messaging is over... EXITING");
+                break;
+            }
+        }
+
+        // Step 9: Close all connections
+        socket.close();
+        servsock.close();
+        dis.close();
+        dos.close();
+    }
+}

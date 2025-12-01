@@ -1,0 +1,12 @@
+%{
+#include<stdio.h>;
+%}
+%%
+"3csec" { printf("*"); }
+%%
+int yywrap(void) {}
+void main()
+{
+    printf("Enter the String:");
+    yylex();
+}

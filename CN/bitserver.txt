@@ -1,0 +1,55 @@
+// BitStuffingServer.java
+import java.io.*;
+import java.net.*;
+
+public class BitStuffingServer {
+    public static void main(String[] args) throws IOException {
+
+        int port = 6789; // default port number
+
+        // Step 1: Start the server on port 6789
+        ServerSocket skt = new ServerSocket(port);
+        System.out.println("Server started on port: " + port);
+
+        // Step 2: Wait for client connection
+        Socket socket = skt.accept();
+        System.out.println("Client connected.");
+
+        // Step 3: Setup input/output streams
+        DataInputStream dis = new DataInputStream(socket.getInputStream());
+        DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+
+        // Step 4: Receive stuffed data from client
+        String s = dis.readUTF();
+        System.out.println("Stuffed data from client: " + s);
+
+        // Step 5: Perform bit unstuffing
+        System.out.println("Unstuffed data: ");
+        int cnt = 0;
+
+        // Skip flag bytes (first and last 8 bits)
+        for (int i = 8; i < s.length() - 8; i++) {
+            char ch = s.charAt(i);
+
+            if (ch == '1') {
+                cnt++;
+                System.out.print(ch);
+
+                // When 5 consecutive 1s are found, skip the next bit (stuffed 0)
+                if (cnt == 5) {
+                    i++; // skip stuffed '0'
+                    cnt = 0;
+                }
+            } else {
+                System.out.print(ch);
+                cnt = 0;
+            }
+        }
+
+        System.out.println(); // print newline after unstuffed data
+
+        // Step 6: Close connections
+        socket.close();
+        skt.close();
+    }
+}
