@@ -1,0 +1,74 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.*;
+
+public class networkcommand{
+    public static void runCommand(String... command){
+        try{
+            ProcessBuilder pb=new ProcessBuilder(command);
+            pb.redirectErrorStream(true);
+            Process process=pb.start();
+            BufferedReader reader=new BufferedReader(new InputStreamReader( process.getInputStream()));
+            String line;
+            while((line=reader.readLine())!=null){
+                System.out.println(line);
+            }
+            process.waitFor();
+        }   catch (Exception e){
+             e.printStackTrace();
+    }
+}
+public static void main(String[] args){
+    Scanner sc=new Scanner(System.in);
+    int choice;
+    do{
+        System.out.println("===commands===");
+        System.out.println("1.ping");
+        System.out.println("2.ipconfig");
+        System.out.println("3.tracert");
+        System.out.println("4.nslookup");
+        System.out.println("5.netstat");
+        System.out.println("6.exit");
+        choice=sc.nextInt();
+    
+    switch(choice){
+        case 1:
+            System.out.print("enter the ip/website:");
+            String s=sc.next();
+            runCommand("ping",s);
+            break;
+            
+        case 2:
+            runCommand("ipconfig");  // Windows
+                    // runCommand("ifconfig"); // Linux/Mac
+            break;
+
+        case 3:
+            System.out.print("Enter website/IP to trace: ");
+            String traceHost = sc.next();
+            runCommand("tracert", traceHost);  // Windows
+                    // runCommand("traceroute", traceHost); // Linux/Mac
+            break;
+
+        case 4:
+            System.out.print("Enter domain for nslookup: ");
+            String domain = sc.next();
+            runCommand("nslookup", domain);
+            break;
+
+        case 5:
+            runCommand("netstat");
+            break;
+
+        case 6:
+            System.out.println("Exiting...");
+            break;
+            
+        default:
+            System.out.println("invalid");
+        
+        
+    }
+} while (choice!=6);
+    sc.close();
+}}
